@@ -1,6 +1,7 @@
 ## Interface: 30300
-## Title: AutoCollectAppearance (Ascension) v5.1
+## Title: AutoCollectAppearance (Ascension) v6.0
 ## Notes: Automatically accepts appearance collection confirmation popups for Ascension by Ashi-Ryu 
-## Version: 5.1
+## Version: 6.0
 ## Author: Ashi-Ryu
+## SavedVariables: AutoCollectAppearanceDB
 AutoCollectAppearance.lua
