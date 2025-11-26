@@ -1,6 +1,6 @@
 -- AutoCollectAppearance v6.0 - Ascension
 -- Automatically accepts the transmog/appearance collection confirmation popup for Ascension by Ashi-Ryu
--- Added: Floating clickable button to manually collect appearances from bags
+-- Added: Floating clickable button to automatically collect appearances from bags
 -- Added: Options page with scale slider and text change
 -- Added: Button position saving
 
@@ -66,7 +66,7 @@ button:SetScript("OnClick", function(self, btn)
                 end
             end
         end
-        print("|cFF00FF00" .. ADDON_NAME .. ": Manual transmog collection from bags completed!|r")
+        print("|cFF00FF00" .. ADDON_NAME .. ": Automatic transmog collection from bags completed!|r")
     end
 end)
 
