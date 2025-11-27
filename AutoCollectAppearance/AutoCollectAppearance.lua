@@ -100,9 +100,11 @@ eventFrame:SetScript("OnEvent", function(self, event, addon)
         
         -- Apply icon or text mode
         if DB.useIcon then
+            button:SetSize(40, 40)  -- Square for icon
             button:SetText("")
             button.icon:Show()
         else
+            button:SetSize(120, 30)  -- Rectangle for text
             button:SetText(DB.text)
             button.icon:Hide()
         end
@@ -165,9 +167,11 @@ eventFrame:SetScript("OnEvent", function(self, event, addon)
         checkbox:SetScript("OnClick", function(self)
             DB.useIcon = self:GetChecked()
             if DB.useIcon then
+                button:SetSize(40, 40)  -- Square for icon
                 button:SetText("")
                 button.icon:Show()
             else
+                button:SetSize(120, 30)  -- Rectangle for text
                 button:SetText(DB.text)
                 button.icon:Hide()
             end
