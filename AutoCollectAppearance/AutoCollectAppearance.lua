@@ -56,15 +56,17 @@ border:Hide()
 -- Create icon texture
 local icon = button:CreateTexture(nil, "ARTWORK")
 icon:SetAllPoints(button)
-icon:SetTexture("Interface\\Icons\\inv_manaforgedbarrier_blue")
+icon:SetTexture("Interface\\Icons\\Spell_ChargePositive")
 icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)  -- Crop icon edges for better look
 button.icon = icon
 icon:Hide()  -- Hidden by default
 
 -- Create count text overlay
-local countText = button:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+local countText = button:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
 countText:SetPoint("CENTER", button, "CENTER", 0, 0)
-countText:SetTextColor(1, 1, 1, 1)
+countText:SetTextColor(0, 0, 0, 1)
+countText:SetShadowOffset(1, -1)
+countText:SetShadowColor(1, 1, 1, 0.8)
 button.countText = countText
 countText:Hide()
 
@@ -164,10 +166,12 @@ button:SetScript("OnClick", function(self, btn)
         for b = 0, 4 do
             for s = 1, GetContainerNumSlots(b) do
                 local itemID = GetContainerItemID(b, s)
-                if itemID and not c.IsAppearanceCollected(C_Appearance.GetItemAppearanceID(itemID)) then
-                    -- Check if we should skip unbound items
-                    local shouldCollect = true
-                    if not DB.addUnbound and not forceAll then
+                if itemID then
+                    local appearanceID = C_Appearance.GetItemAppearanceID(itemID)
+                    if appearanceID and not c.IsAppearanceCollected(appearanceID) then
+                        -- Check if we should skip unbound items
+                        local shouldCollect = true
+                        if not DB.addUnbound and not forceAll then
                         local tooltip = CreateFrame("GameTooltip", "ACA_CollectTooltip" .. b .. s, nil, "GameTooltipTemplate")
                         tooltip:SetOwner(UIParent, "ANCHOR_NONE")
                         tooltip:SetBagItem(b, s)
@@ -186,11 +190,12 @@ button:SetScript("OnClick", function(self, btn)
                         shouldCollect = isBound
                     end
                     
-                    if shouldCollect then
-                        c.CollectItemAppearance(GetContainerItemGUID(b, s))
-                        collected = collected + 1
-                    else
-                        skipped = skipped + 1
+                        if shouldCollect then
+                            c.CollectItemAppearance(GetContainerItemGUID(b, s))
+                            collected = collected + 1
+                        else
+                            skipped = skipped + 1
+                        end
                     end
                 end
             end
@@ -296,32 +301,9 @@ eventFrame:SetScript("OnEvent", function(self, event, addon)
             self.tooltipText = tostring(value)  -- Optional: Show current value in tooltip if desired
         end)
 
-        -- Button Text EditBox
-        local editLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-        editLabel:SetPoint("TOPLEFT", slider, "BOTTOMLEFT", 0, -32)
-        editLabel:SetText("Button Text:")
-
-        local edit = CreateFrame("EditBox", "ACA_TextEdit", panel, "InputBoxTemplate")
-        edit:SetPoint("LEFT", editLabel, "RIGHT", 8, 0)
-        edit:SetSize(150, 20)
-        edit:SetAutoFocus(false)
-        edit:SetText(DB.text)
-        edit:SetScript("OnEnterPressed", function(self)
-            local newText = self:GetText()
-            if newText and newText ~= "" then
-                DB.text = newText
-                button:SetText(newText)
-            end
-            self:ClearFocus()
-        end)
-        edit:SetScript("OnEscapePressed", function(self)
-            self:SetText(DB.text)
-            self:ClearFocus()
-        end)
-
         -- Icon Mode Checkbox
         local checkbox = CreateFrame("CheckButton", "ACA_IconCheckbox", panel, "InterfaceOptionsCheckButtonTemplate")
-        checkbox:SetPoint("TOPLEFT", editLabel, "BOTTOMLEFT", 0, -16)
+        checkbox:SetPoint("TOPLEFT", slider, "BOTTOMLEFT", 0, -16)
         _G[checkbox:GetName() .. "Text"]:SetText("Use Icon Instead of Text")
         checkbox:SetChecked(DB.useIcon)
         checkbox:SetScript("OnClick", function(self)
