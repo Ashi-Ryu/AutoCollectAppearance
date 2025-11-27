@@ -42,6 +42,14 @@ button:SetPoint("CENTER", UIParent, "CENTER", 0, 0)  -- Default position
 button:SetMovable(true)
 button:EnableMouse(true)
 button:RegisterForDrag("LeftButton")
+
+-- Create icon texture
+local icon = button:CreateTexture(nil, "ARTWORK")
+icon:SetAllPoints(button)
+icon:SetTexture("Interface\\Icons\\inv_manaforgedbarrier_blue")
+button.icon = icon
+icon:Hide()  -- Hidden by default
+
 button:SetScript("OnDragStart", button.StartMoving)
 button:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
@@ -82,13 +90,22 @@ eventFrame:SetScript("OnEvent", function(self, event, addon)
         DB = AutoCollectAppearanceDB
         DB.scale = DB.scale or 1.0
         DB.text = DB.text or "Collect Tmog"
+        DB.useIcon = DB.useIcon or false  -- Default to text mode
         DB.position = DB.position or { point = "CENTER", relativeToName = "UIParent", relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
 
         -- Apply settings to button
         button:ClearAllPoints()
         button:SetPoint(DB.position.point, DB.position.relativeToName, DB.position.relativePoint, DB.position.xOfs, DB.position.yOfs)
         button:SetScale(DB.scale)
-        button:SetText(DB.text)
+        
+        -- Apply icon or text mode
+        if DB.useIcon then
+            button:SetText("")
+            button.icon:Show()
+        else
+            button:SetText(DB.text)
+            button.icon:Hide()
+        end
 
         -- Create options panel
         local panel = CreateFrame("Frame", "AutoCollectAppearanceOptions", UIParent)
@@ -138,6 +155,22 @@ eventFrame:SetScript("OnEvent", function(self, event, addon)
         edit:SetScript("OnEscapePressed", function(self)
             self:SetText(DB.text)
             self:ClearFocus()
+        end)
+
+        -- Icon Mode Checkbox
+        local checkbox = CreateFrame("CheckButton", "ACA_IconCheckbox", panel, "InterfaceOptionsCheckButtonTemplate")
+        checkbox:SetPoint("TOPLEFT", editLabel, "BOTTOMLEFT", 0, -16)
+        _G[checkbox:GetName() .. "Text"]:SetText("Use Icon Instead of Text")
+        checkbox:SetChecked(DB.useIcon)
+        checkbox:SetScript("OnClick", function(self)
+            DB.useIcon = self:GetChecked()
+            if DB.useIcon then
+                button:SetText("")
+                button.icon:Show()
+            else
+                button:SetText(DB.text)
+                button.icon:Hide()
+            end
         end)
 
         self:UnregisterEvent("ADDON_LOADED")
