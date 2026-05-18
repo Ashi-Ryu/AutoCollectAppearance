@@ -172,23 +172,24 @@ button:SetScript("OnClick", function(self, btn)
                         -- Check if we should skip unbound items
                         local shouldCollect = true
                         if not DB.addUnbound and not forceAll then
-                        local tooltip = CreateFrame("GameTooltip", "ACA_CollectTooltip" .. b .. s, nil, "GameTooltipTemplate")
-                        tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-                        tooltip:SetBagItem(b, s)
-                        local isBound = false
-                        for i = 1, tooltip:NumLines() do
-                            local line = _G["ACA_CollectTooltip" .. b .. s .. "TextLeft" .. i]
-                            if line then
-                                local text = line:GetText()
-                                if text and (string.find(text, "Soulbound") or string.find(text, "Bound to")) then
-                                    isBound = true
-                                    break
+                            local tooltip = CreateFrame("GameTooltip", "ACA_CollectTooltip" .. b .. s, nil, "GameTooltipTemplate")
+                            tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                            tooltip:SetBagItem(b, s)
+                            local willBind = false
+                            for i = 1, tooltip:NumLines() do
+                                local line = _G["ACA_CollectTooltip" .. b .. s .. "TextLeft" .. i]
+                                if line then
+                                    local text = line:GetText()
+                                    if text and string.find(text, "Binds when") then
+                                        willBind = true
+                                        break
+                                    end
                                 end
                             end
+                            tooltip:Hide()
+                            -- Only skip if the item will bind on collect; grey/white/already-bound items have no such text
+                            shouldCollect = not willBind
                         end
-                        tooltip:Hide()
-                        shouldCollect = isBound
-                    end
                     
                         if shouldCollect then
                             c.CollectItemAppearance(GetContainerItemGUID(b, s))
@@ -242,7 +243,7 @@ eventFrame:SetScript("OnEvent", function(self, event, addon)
         DB.text = DB.text or "Collect Tmog"
         DB.useIcon = DB.useIcon or false  -- Default to text mode
         DB.hideWhenZero = DB.hideWhenZero or false  -- Default to always show
-        DB.addUnbound = DB.addUnbound ~= false  -- Default to true (will bind items)
+        DB.addUnbound = DB.addUnbound or false  -- Default to false (skip unbound items unless shift-held)
         DB.position = DB.position or { point = "CENTER", relativeToName = "UIParent", relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
 
         -- Apply settings to button
@@ -346,7 +347,7 @@ eventFrame:SetScript("OnEvent", function(self, event, addon)
         _G[unboundCheckbox:GetName() .. "Text"]:SetText("Always add unbound items (will bind them)")
         unboundCheckbox:SetChecked(DB.addUnbound)
         unboundCheckbox:SetScript("OnClick", function(self)
-            DB.addUnbound = self:GetChecked()
+            DB.addUnbound = self:GetChecked() and true or false  -- Explicitly save boolean, not nil
             UpdateButtonDisplay()
         end)
 
